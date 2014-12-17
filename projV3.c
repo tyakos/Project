@@ -147,19 +147,6 @@ int main(int argc, char *argv[])
     {
      x_coord = graph_size*(x[j] - min_total)/scale;
      y_coord = graph_size*(y[j] - min_total)/scale;
-     if(kbhit())
-     {
-       printf("Continue? (y to continue, n to stop and quit)");
-       answer_yn = '0';
-       while( (answer_yn != 'y')&&(answer_yn != 'n') ) 
-       { 
-        answer_yn = getchar();  
-       } 
-       if(answer_yn == 'n')
-       {
-       ans = 'q';
-       }
-     }
      printf("%d %d \n", x_coord, y_coord);
      printf("Iteration: %ld/%ld   ", j, iterations);
      printf("Step: %d/%d \n", p, number_of_steps);
@@ -177,14 +164,21 @@ int main(int argc, char *argv[])
    
      j = j + time_scaling;
      graph[x_coord][y_coord] = 9;
+     ans2 = '0';
+     if(kbhit())
+     {
+       printf("Continue? (y to continue, q to stop and quit, m to enter manual mode)");     
+     while( (ans2 != 'y')&&(ans2 != 'q')&&(ans2 != 'm') )
+      { 
+       ans2 = getchar();  
+      } 
+      if(ans2 == 'q') ans = 'q';
+      else if(ans2 == 'm') ans = 'm';
+     }
     }
     
     else if(ans == 'm')
     {
-     printf("Continue?:");
-     ans2 = getchar();
-     if(ans2 == 'a') ans = 'a';
-     if(ans2 == 'q') ans = 'q';
      x_coord = graph_size*(x[j] - min_total)/scale;
      y_coord = graph_size*(y[j] - min_total)/scale;
      printf("%d %d \n", x_coord, y_coord);
@@ -203,6 +197,10 @@ int main(int argc, char *argv[])
    
      j = j + time_scaling;
      graph[x_coord][y_coord] = 9;
+     printf("Continue?:");
+     ans2 = getchar();
+     if(ans2 == 'a') ans = 'a';
+     if(ans2 == 'q') ans = 'q';
     }
     
     else if(ans == 'q')
