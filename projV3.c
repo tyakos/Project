@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
    graph[x_coord][y_coord] = 8;
    j = 2;
    printf("Usage: a for automatic mode, m for manual mode,\n in manual: Enter to plot the next step; q to plot all the steps and quit. \n An 8 marks the fixed objects, 0 - current location, 9 - trajectory (previous locations). \n Hint: press and hold Enter in manual mode \n Hint: you can enter automatic mode at any time. \n Press enter in automatic mode to pause. \n So: ");
-   getchar();
+   getchar(); //getchar to eat a \n left after scanf
    ans = getchar();
    for(p = 0; p < number_of_steps; p++)
    {
