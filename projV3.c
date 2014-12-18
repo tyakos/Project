@@ -10,9 +10,9 @@ int kbhit();
 int main(int argc, char *argv[])
 {
   FILE* output;
-  int validInput, answer_yn;
+  int validInput, answer_yn; 					//int ans to evade EOF trap
   long int i = 0, j, max_recursion_number = 500000, iterations; //adjust max_recursion_number depending on cpu available
-  double t = 0.0001;  //works well for the current max_recursion_number, adjust if needed
+  double t = 0.0001;  						//works well for the current max_recursion_number, adjust if needed
   double collision = 0.1;
   double v[2], m[2], a[2];
   double *y,*x;
@@ -29,15 +29,15 @@ int main(int argc, char *argv[])
   x[1] = -1;
   y[1] = 0;
   validInput = (argc == 7);
-  validInput = validInput && sscanf(argv[1],"%lf", &x[2]); 
-  validInput = validInput && sscanf(argv[2],"%lf", &y[2]); 
-  validInput = validInput && sscanf(argv[3],"%lf", &v[0]);
-  validInput = validInput && sscanf(argv[4],"%lf", &v[1]);
-  validInput = validInput && sscanf(argv[5],"%lf", &m[0]) && (m[0] >= 0);
-  validInput = validInput && sscanf(argv[6],"%lf", &m[1]) && (m[1] >= 0);
+  validInput = validInput && sscanf(argv[1],"%lf", &m[0]) && (m[1] >= 0); 
+  validInput = validInput && sscanf(argv[2],"%lf", &m[1]) && (m[0] >= 0); 
+  validInput = validInput && sscanf(argv[3],"%lf", &x[2]);
+  validInput = validInput && sscanf(argv[4],"%lf", &y[2]);
+  validInput = validInput && sscanf(argv[5],"%lf", &v[0]);
+  validInput = validInput && sscanf(argv[6],"%lf", &v[1]);
   if(!validInput)
    {
-    fputs("Input validation failure, please use the program with x(0), y(0), vx(0), vy(0), m1, m2 as the command line options, exiting.\n", stderr);
+    fputs("Input validation failure, please use the program with m_1, m_2, x_0, y_0, v_x, v_y as the command line options, exiting.\n", stderr);
     return(EXIT_FAILURE);
    }
   x[3] = x[2] + t*v[0];
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
   
   for(i = 3; i < max_recursion_number-1; i++)
   {
-    if(distance(0, i, x, y) < collision || distance(1, i, x, y) < collision)
+    if(distance(0, i, x, y) < collision || distance(1, i, x, y) < collision)	//Check if objects collided
    {
      printf("Collision occured in time %lf \n", i*t);
      break;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
   
   // Now write the output into file
   
-  output=fopen("output2.dat", "w");
+  output=fopen("output.dat", "w");
   if(output != (FILE*)NULL) 
   {
    for(j=2; j<=i; j++)
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     fprintf(output, "%lf %lf %lf\n", x[j], y[j], (j-2)*t);
    }
    fclose(output);
-   printf("Trajectory written to output2.dat \n");
+   printf("Trajectory written to output.dat \n");
   }
   else
   {
@@ -87,16 +87,26 @@ int main(int argc, char *argv[])
    answer_yn = getchar();  
   } 
   
+  //I had a look at ncurses, but decided to write my own visualization as an extension. Also, ncurses is not present on every computer.
+  
   if(answer_yn == 'y')
   {
-   double min_total, max_total, scale;
+   double min_total = -1, max_total = 1, scale;
    int k, n, p, x_coord, y_coord, graph_size;
    long int number_of_steps, time_scaling;
-   int graph[52][52], ans, ans2; //int ans intead of char for ans because of EOF trap
-   graph_size = 50;  
-   printf("Enter the number of steps in which you want to display the motion: ");
-   scanf("%ld", &number_of_steps);
-   time_scaling = iterations/number_of_steps;
+   int graph[51][51], ans, ans2; 		//int ans intead of char for ans because of EOF trap
+   graph_size = 50;  				//
+   printf("Enter the number of steps in which you want to display the motion (recommended 1000): ");
+   validInput = 0;
+   while(validInput != 1)
+   {
+     validInput = scanf("%ld", &number_of_steps);
+     getchar();					//getchar to eat a \n left after scanf
+   }
+   time_scaling = iterations/number_of_steps;	//not going to plot every value of x,y, instead, ask for a number
+   
+   //To have a graph of reasonable scale, find a good value by working out the max and min of all x,y.
+   
    for(j = 0; j < graph_size+1; j++)
    {
     for(k = 0; k < graph_size+1; k++)
@@ -138,10 +148,13 @@ int main(int argc, char *argv[])
    y_coord = graph_size*(0 - min_total)/scale;
    graph[x_coord][y_coord] = 8;
    j = 2;
-   printf("Usage: a for automatic mode, m for manual mode,\n in manual: Enter to plot the next step; q to plot all the steps and quit. \n An 8 marks the fixed objects, 0 - current location, 9 - trajectory (previous locations). \n Hint: press and hold Enter in manual mode \n Hint: you can enter automatic mode at any time. \n Press enter in automatic mode to pause. \n So: ");
-   getchar(); //getchar to eat a \n left after scanf
-   ans = getchar();
-   for(p = 0; p < number_of_steps; p++)
+   printf("Usage: a for automatic mode, m for manual mode, q to plot all the steps and quit\n In manual: Enter to plot the next step. \n An 8 marks the fixed objects, 0 - current location, 9 - trajectory (previous locations). \n Hint: press and hold Enter in manual mode \n You can enter automatic mode with a or quit with q at any time. \n Press enter in automatic mode to pause. ");
+   printf("\n Continue(a/m/q): ");
+   while( (ans != 'q')&&(ans != 'm')&&(ans != 'a') )
+   {
+    ans = getchar();
+   } 
+   for(p = 0; p <= number_of_steps; p++)
    {
     if(ans == 'a')
     {
@@ -162,7 +175,7 @@ int main(int argc, char *argv[])
      }
           usleep(10000);
    
-     j = j + time_scaling;
+     j += time_scaling;
      graph[x_coord][y_coord] = 9;
      ans2 = '0';
      if(kbhit())
@@ -211,11 +224,11 @@ int main(int argc, char *argv[])
      j = j + time_scaling;
      graph[x_coord][y_coord] = 9;
     }
-    else
-    {
-      printf("enter a valit character next time, asshole \n");
-      break;
-    }
+//     else
+//     {
+//       printf("Something went wrong\n");	DEBUG CODE
+//       break;
+//     }
    }
 
    if(ans == 'q')
@@ -233,8 +246,6 @@ int main(int argc, char *argv[])
 
   }
 
-  
-  
   free(x);
   free(y);
   
@@ -244,12 +255,10 @@ int main(int argc, char *argv[])
 
 double distance(int a, int b, double* x, double* y)
 {
-  double e = 0;
-  e = sqrt((x[a] - x[b])*(x[a] - x[b]) + (y[a] - y[b])*(y[a] - y[b]));
-  return e;  
+ return(sqrt((x[a] - x[b])*(x[a] - x[b]) + (y[a] - y[b])*(y[a] - y[b])));
 } 
 
-int kbhit()
+int kbhit() //I had to search and research to find this fuction and make it work in my case.
 {
   struct timeval tv;
   fd_set fds;
