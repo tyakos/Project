@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
   int validInput, answer_yn; 					//int ans to evade EOF trap
   long int i = 0, j, max_recursion_number = 500000, iterations; //adjust max_recursion_number depending on cpu available
   double t = 0.0001;  						//works well for the current max_recursion_number, adjust if needed
-  double collision = 0.1;
+  double collision = 0.01;
   double v[2], m[2], a[2];
   double *y,*x;
   y = (double*)malloc(max_recursion_number*sizeof(double));
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
    y[i+1] = t*t*a[1] + 2*y[i] - y[i-1];
   }
 
-  if(i == max_recursion_number)
+  if(i == max_recursion_number-1)
   {
     printf("All iterations successful, collision did not occur in given time \n");
   }
